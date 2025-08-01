@@ -24,7 +24,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddIdentity<AppUserModel,IdentityRole>()
-    .AddEntityFrameworkStores<DbContext>().AddDefaultTokenProviders();
+    .AddEntityFrameworkStores<DataContext>().AddDefaultTokenProviders();
 builder.Services.AddRazorPages();
 
 builder.Services.Configure<IdentityOptions>(options =>
