@@ -14,21 +14,21 @@ namespace Shopping_Tutorial.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
-        public IActionResult Login(string returnUrl) 
+        public IActionResult Login(string returnUrl)
         {
-            return View(new LoginViewModel { ReturnUrl =returnUrl});
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginVM)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginVM.Username, loginVM.Password, false, false);
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("Login", "Account", new { returnUrl = "/Admin/Product" });
+                    return Redirect(loginVM.ReturnUrl ?? "/");
                 }
-                ModelState.AddModelError("","Invalid Username and Password !");
+                ModelState.AddModelError("", "Bạn nhập Username hoặc Password bị sai vui long nhập lại");
             }
             return View(loginVM);
         }
@@ -42,11 +42,12 @@ namespace Shopping_Tutorial.Controllers
             if (ModelState.IsValid)
             {
                 AppUserModel newUser = new AppUserModel { UserName = user.Username, Email = user.Email };
-                IdentityResult result = await _userManager.CreateAsync(newUser);
+                IdentityResult result = await _userManager.CreateAsync(newUser, user.Password);
                 if (result.Succeeded)
                 {
                     TempData["success"] = "Tạo user thành công.";
-                    return RedirectToAction("Index", "Account");
+                    //return RedirectToAction("/account/login");
+                    return RedirectToAction("Login", "Account");
                 }
                 foreach (IdentityError error in result.Errors)
                 {
@@ -54,6 +55,11 @@ namespace Shopping_Tutorial.Controllers
                 }
             }
             return View(user);
+        }
+        public async Task<IActionResult> Logout(string returnUrl ="/")
+        {
+            await _signInManager.SignOutAsync();
+            return Redirect(returnUrl);
         }
     }
 }

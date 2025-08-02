@@ -5,7 +5,7 @@ namespace Shopping_Tutorial.Models
     public class UserModel
     {
         public int Id { get; set; }
-        [Required(ErrorMessage = "VYêu cầu nhập UserName !")]
+        [Required(ErrorMessage = "Yêu cầu nhập UserName !")]
         public string Username { get; set; }
 
         [Required(ErrorMessage = "Yêu cầu nhập Email !"),EmailAddress]
