@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace Shopping_Tutorial.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Route("Admin/User")]
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly UserManager<AppUserModel> _userManager;
@@ -25,7 +27,16 @@ namespace Shopping_Tutorial.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.OrderByDescending(u => u.Id).ToListAsync();
-            return View(users);
+            var userList = new List<AppUserModel>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                user.RoleNames = string.Join(", ", roles); // ghép role thành chuỗi
+                userList.Add(user);
+            }
+
+            return View(userList);
         }
 
         // ---------------------- TẠO NGƯỜI DÙNG ----------------------

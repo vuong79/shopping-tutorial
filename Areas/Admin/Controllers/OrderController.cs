@@ -6,7 +6,7 @@ using Shopping_Tutorial.Repository;
 namespace Shopping_Tutorial.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class OrderController : Controller
     {
         private readonly DataContext _dataContext;

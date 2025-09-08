@@ -9,9 +9,9 @@
     {
         [Area("Admin")]
         [Route("Admin/Product")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
 
-        public class ProductController : Controller
+    public class ProductController : Controller
         {
             private readonly DataContext _dataContext;
             private readonly IWebHostEnvironment _webHostEnvironment;

@@ -22,7 +22,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.IsEssential = true;
 });
-
+ //khai bao Identity
 builder.Services.AddIdentity<AppUserModel,IdentityRole>()
     .AddEntityFrameworkStores<DataContext>().AddDefaultTokenProviders();
 builder.Services.AddRazorPages();
