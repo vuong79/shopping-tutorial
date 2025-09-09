@@ -148,3 +148,6 @@ E:\Shopping_Tutorial\Shopping_Tutorial\obj\Debug\net8.0\Shopping_Tutorial.pdb
 E:\Shopping_Tutorial\Shopping_Tutorial\obj\Debug\net8.0\Shopping_Tutorial.genruntimeconfig.cache
 E:\Shopping_Tutorial\Shopping_Tutorial\obj\Debug\net8.0\ref\Shopping_Tutorial.dll
 E:\Shopping_Tutorial\Shopping_Tutorial\obj\Debug\net8.0\Shopping_Tutorial.sourcelink.json
+E:\Shopping_Tutorial\Shopping_Tutorial\obj\Debug\net8.0\Shopping_Tutorial.MvcApplicationPartsAssemblyInfo.cs
+E:\Shopping_Tutorial\Shopping_Tutorial\bin\Debug\net8.0\X.PagedList.dll
+E:\Shopping_Tutorial\Shopping_Tutorial\bin\Debug\net8.0\X.PagedList.Mvc.Core.dll

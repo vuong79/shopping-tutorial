@@ -1,41 +1,45 @@
-﻿@model IEnumerable<AppUserModel>
-@{
-    ViewData["Title"] = "List User";
-}
+﻿<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-body">
+            <h3 class="mb-3">List User</h3>
+            @model IEnumerable<AppUserModel>
+            @{
+                ViewData["Title"] = "List User";
+            }
+            <a class="btn btn-primary mb-3" asp-action="Create" asp-controller="User">Add User</a>
 
-<h3>List User</h3>
-
-<a class="btn btn-primary mb-3" asp-action="Create" asp-controller="User">Add User</a>
-
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Id</th>
-            <th>UserName</th>
-            <th>Email</th>
-            <th>PasswordHash</th>
-            <th>Phone</th>
-            <th>Role</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>@user.Id</td>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
-                <td>@user.PasswordHash</td>
-                <td>@user.PhoneNumber</td>
-                <td>@user.RoleNames</td>
-                <td>
-                    <a class="btn btn-warning btn-sm"
-                       asp-action="Edit" asp-controller="User" asp-route-id="@user.Id">Edit</a>
-                    <a class="btn btn-danger btn-sm confirmDeletion"
-                       asp-action="Delete" asp-controller="User" asp-route-id="@user.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+            <table class="table table-bordered table-striped mx-auto" style="max-width: 1100px; table-layout: fixed; word-wrap: break-word;">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 150px;">Id</th>
+                        <th style="width: 120px;">UserName</th>
+                        <th style="width: 200px;">Email</th>
+                        <th style="width: 250px;">PasswordHash</th>
+                        <th style="width: 120px;">Phone</th>
+                        <th style="width: 120px;">Role</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.UserName</td>
+                            <td>@user.Email</td>
+                            <td class="text-truncate">@user.PasswordHash</td>
+                            <td>@user.PhoneNumber</td>
+                            <td>@user.RoleNames</td>
+                            <td>
+                                <a class="btn btn-warning btn-sm"
+                                   asp-action="Edit" asp-controller="User" asp-route-id="@user.Id">Edit</a>
+                                <a class="btn btn-danger btn-sm confirmDeletion"
+                                   asp-action="Delete" asp-controller="User" asp-route-id="@user.Id">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
