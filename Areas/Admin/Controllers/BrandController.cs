@@ -43,10 +43,10 @@ namespace Shopping_Tutorial.Areas.Admin.Controllers
             return View(brand);
         }
 
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
             return View();
-        }
+        }   
 
         [HttpPost]
         [ValidateAntiForgeryToken]
