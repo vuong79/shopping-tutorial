@@ -12,10 +12,12 @@ namespace Shopping_Tutorial.Areas.Admin.Repository
             {
                 client.EnableSsl = true;
                 client.UseDefaultCredentials = false;
-                client.Credentials = new NetworkCredential("doanminhvuong071@gmail.com", "app_password");
-                //dùng App Password, không dùng mật khẩu Gmail thường
+
+                // Gmail + App Password (16 ký tự)
+                client.Credentials = new NetworkCredential("ny5489656@gmail.com", "bbxkgizhshsvucdq");
+
                 var mailMessage = new MailMessage(
-                    from: "doanminhvuong071@gmail.com",
+                    from: "ny5489656@gmail.com",
                     to: email,
                     subject,
                     htmlMessage
@@ -23,8 +25,10 @@ namespace Shopping_Tutorial.Areas.Admin.Repository
                 {
                     IsBodyHtml = true
                 };
+
                 await client.SendMailAsync(mailMessage);
             }
         }
     }
 }
+

@@ -10,7 +10,8 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
+//Add Email Sender service
+builder.Services.AddTransient<Shopping_Tutorial.Areas.Admin.Repository.IEmailSender,Shopping_Tutorial.Areas.Admin.Repository.EmailSender>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
