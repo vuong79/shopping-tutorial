@@ -3,46 +3,72 @@ using Shopping_Tutorial.Models;
 using Microsoft.AspNetCore.Identity;
 using Shopping_Tutorial.Models.ViewModels;
 using Shopping_Tutorial.Areas.Admin.Repository;
+
 namespace Shopping_Tutorial.Controllers
 {
     public class AccountController : Controller
     {
-        private UserManager<AppUserModel> _userManager;
-        private SignInManager<AppUserModel> _signInManager;
+        private readonly UserManager<AppUserModel> _userManager;
+        private readonly SignInManager<AppUserModel> _signInManager;
         private readonly IEmailSender _emailSender;
-        public AccountController(IEmailSender emailSender,UserManager<AppUserModel> userManager, SignInManager<AppUserModel> signInManager)
+
+        public AccountController(
+            IEmailSender emailSender,
+            UserManager<AppUserModel> userManager,
+            SignInManager<AppUserModel> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
         }
+
+        // GET: Login
         public IActionResult Login(string returnUrl)
         {
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
+
+        // POST: Login
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginVM)
         {
             if (ModelState.IsValid)
             {
-                Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginVM.Username, loginVM.Password, false, false);
+                var result = await _signInManager.PasswordSignInAsync(
+                    loginVM.Username, loginVM.Password, false, false);
+
                 if (result.Succeeded)
                 {
                     TempData["success"] = "Đăng nhập thành công.";
-                    var receiver = "ny5489656@gmail.com";
-                    var subject = "Đăng nhập thành công";
-                    var message = "Bạn đã đăng nhập thành công vào trang Shopping_Tutorial";
-                    await _emailSender.SendEmailAsync(receiver, subject, message);
+
+                    // Lấy user theo Username
+                    var user = await _userManager.FindByNameAsync(loginVM.Username);
+
+                    if (user != null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        var subject = "Đăng nhập thành công";
+                        var message = $@"
+                        <p>Xin chào <strong>{user.UserName}</strong>,</p>
+                        <p>Bạn đã đăng nhập thành công vào hệ thống lúc {DateTime.Now}.</p>";
+
+                        await _emailSender.SendEmailAsync(user.Email, subject, message);
+                    }
+
                     return Redirect(loginVM.ReturnUrl ?? "/");
                 }
-                ModelState.AddModelError("", "Bạn nhập Username hoặc Password bị sai vui long nhập lại");
+
+                ModelState.AddModelError("", "Sai Username hoặc Password.");
             }
             return View(loginVM);
         }
+
+        // GET: Create User
         public IActionResult Create()
         {
             return View();
         }
+
+        // POST: Create User
         [HttpPost]
         public async Task<IActionResult> Create(UserModel user)
         {
@@ -60,14 +86,13 @@ namespace Shopping_Tutorial.Controllers
                 {
                     TempData["success"] = "Tạo user thành công.";
 
-                    // Gửi username + password trực tiếp (plaintext)
-                    var subject = "Thông tin tài khoản của bạn trên Shopping_Tutorial";
+                    // Gửi mail thông tin tài khoản
+                    var subject = "Thông tin tài khoản của bạn";
                     var message = $@"
-                <p>Xin chào <strong>{user.Username}</strong>,</p>
-                <p>Tài khoản của bạn đã được tạo thành công.</p>
-                <p><strong>Tên đăng nhập:</strong> {user.Username}<br />
-                   <strong>Mật khẩu:</strong> {user.Password}</p>
-                <p>Vui lòng giữ kín thông tin này.</p>";
+                    <p>Xin chào <strong>{user.Username}</strong>,</p>
+                    <p>Tài khoản của bạn đã được tạo thành công.</p>
+                    <p><b>Username:</b> {user.Username}<br/>
+                    <b>Password:</b> {user.Password}</p>";
 
                     await _emailSender.SendEmailAsync(user.Email, subject, message);
 
@@ -80,7 +105,8 @@ namespace Shopping_Tutorial.Controllers
             return View(user);
         }
 
-        public async Task<IActionResult> Logout(string returnUrl ="/")
+        // Logout
+        public async Task<IActionResult> Logout(string returnUrl = "/")
         {
             await _signInManager.SignOutAsync();
             return Redirect(returnUrl);

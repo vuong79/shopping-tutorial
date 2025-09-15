@@ -1,29 +1,49 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shopping_Tutorial.Repository;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Shopping_Tutorial.Models;
+using Shopping_Tutorial.Areas.Admin.Repository;
 
-namespace Shopping_Tutorial.Areas.Admin.Controllers
+namespace Shopping_Tutorial.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
     public class OrderController : Controller
     {
-        private readonly DataContext _dataContext;
-        public OrderController(DataContext dataContext)
+        private readonly UserManager<AppUserModel> _userManager;
+        private readonly IEmailSender _emailSender;
+
+        public OrderController(UserManager<AppUserModel> userManager, IEmailSender emailSender)
         {
-            _dataContext = dataContext;
-        }
-        
-        public async Task<IActionResult> Index()
-        {
-            return View(await _dataContext.Orders.OrderByDescending(p => p.Id).ToListAsync());
+            _userManager = userManager;
+            _emailSender = emailSender;
         }
 
-        public async Task<IActionResult> ViewOrder(string ordercode)
+        [HttpPost]
+        public async Task<IActionResult> PlaceOrder(OrderModel order)
         {
-            var DetailsOrder = await _dataContext.OrderDetails.Include(od => od.Product).Where(od=>od.OrderCode==ordercode).ToListAsync();
-            return View(DetailsOrder);
+            if (!ModelState.IsValid)
+                return View(order);
+
+            // Lưu order vào DB (ví dụ)
+            // _context.Orders.Add(order);
+            // await _context.SaveChangesAsync();
+
+            // Lấy user hiện tại
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user != null && !string.IsNullOrEmpty(user.Email))
+            {
+                var subject = $"Xác nhận đơn hàng #{order.Id}";
+                var message = $@"
+                <p>Xin chào <strong>{user.UserName}</strong>,</p>
+                <p>Cảm ơn bạn đã đặt hàng tại Shopping_Tutorial.</p>
+                <p><b>Mã đơn hàng:</b> {order.Id}<br/>
+                <b>Tổng tiền:</b> {order.TotalAmount:N0} VND</p>
+                <p>Chúng tôi sẽ xử lý đơn hàng trong thời gian sớm nhất.</p>";
+
+                await _emailSender.SendEmailAsync(user.Email, subject, message);
+            }
+
+            TempData["success"] = "Đặt hàng thành công!";
+            return RedirectToAction("Index", "Home");
         }
     }
 }

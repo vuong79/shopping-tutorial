@@ -10,49 +10,74 @@ namespace Shopping_Tutorial.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IEmailSender _emailSender;
-        public CheckoutController(IEmailSender emailSender,DataContext dataContext)
+
+        public CheckoutController(IEmailSender emailSender, DataContext dataContext)
         {
             _dataContext = dataContext;
             _emailSender = emailSender;
         }
+
         public async Task<IActionResult> Checkout()
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
-            if (userEmail == null) 
+
+            if (string.IsNullOrEmpty(userEmail))
             {
                 return RedirectToAction("Login", "Account");
             }
-            else
+
+            // Tạo đơn hàng mới
+            var orderCode = Guid.NewGuid().ToString();
+            var orderItem = new OrderModel
             {
-                var ordercode = Guid.NewGuid().ToString();
-                var orderItem = new OrderModel();
-                orderItem.OrderCode = ordercode;
-                orderItem.UserName = userEmail;
-                orderItem.Status = 1;
-                orderItem.CreateDate = DateTime.Now;
-                _dataContext.Add(orderItem);
-                _dataContext.SaveChanges();
-                List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
-                foreach (var cartItem in cartItems)
+                OrderCode = orderCode,
+                UserName = userEmail,
+                Status = 1, // Đơn mới
+                OrderDate = DateTime.Now
+            };
+
+            // Lấy giỏ hàng
+            var cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+
+            decimal totalAmount = 0;
+
+            foreach (var cartItem in cartItems)
+            {
+                var orderDetail = new OrderDetails
                 {
-                    var orderDetail = new OrderDetails();
-                    orderDetail.UserName = userEmail;
-                    orderDetail.OrderCode = ordercode;
-                    orderDetail.ProductId = cartItem.ProductId; 
-                    orderDetail.Price = cartItem.Price;
-                    orderDetail.Quantity = cartItem.Quantity;
-                    _dataContext.Add(orderDetail);
-                    _dataContext.SaveChanges();
-                }
-                HttpContext.Session.Remove("Cart");
-                var receiver = "ny5489656@gmail.com";
-                var subject = "Đăt hang thanh cong";
-                var message = "Bạn đã đăt hang thành công vào trang Shopping_Tutorial";
-                await _emailSender.SendEmailAsync(receiver, subject, message);
-                TempData["success"] = "Đặt hàng thành công. Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất.";
-                return RedirectToAction("Index", "Cart");
+                    UserName = userEmail,
+                    OrderCode = orderCode,
+                    ProductId = cartItem.ProductId,
+                    Price = cartItem.Price,
+                    Quantity = cartItem.Quantity
+                };
+
+                orderItem.OrderDetails.Add(orderDetail);
+                totalAmount += cartItem.Price * cartItem.Quantity;
             }
-                return View();
+
+            orderItem.TotalAmount = totalAmount;
+
+            _dataContext.Add(orderItem);
+            _dataContext.SaveChanges();
+
+            // Xóa giỏ hàng
+            HttpContext.Session.Remove("Cart");
+
+            // Gửi email cho người mua
+            var subject = "Xác nhận đặt hàng thành công";
+            var message = $@"
+                <p>Xin chào <b>{userEmail}</b>,</p>
+                <p>Bạn đã đặt hàng thành công tại <b>Shopping_Tutorial</b>.</p>
+                <p><b>Mã đơn hàng:</b> {orderCode}</p>
+                <p><b>Tổng tiền:</b> {totalAmount:N0} VND</p>
+                <p>Chúng tôi sẽ xử lý đơn hàng và liên hệ với bạn trong thời gian sớm nhất.</p>
+            ";
+
+            await _emailSender.SendEmailAsync(userEmail, subject, message);
+
+            TempData["success"] = "Đặt hàng thành công. Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất.";
+            return RedirectToAction("Index", "Cart");
         }
     }
 }

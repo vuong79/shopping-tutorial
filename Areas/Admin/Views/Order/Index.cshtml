@@ -22,8 +22,7 @@
                 <th>#</th>
                 <th scope="row">@item.OrderCode</th>
                 <td>@item.UserName</td>
-                <td>@item.CreateDate</td>
-
+                <td>@item.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>
                     @if (item.Status == 1)
                     {
